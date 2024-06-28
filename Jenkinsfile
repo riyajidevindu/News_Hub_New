@@ -26,8 +26,8 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
 
-                withCredentials([string(credentialsId: 'docker-password', variable: 'dockerhub-pass')]) {
-                  script {
+                withCredentials([string(credentialsId: 'dockerhub-password', variable: 'dockerhub-pass')]) {
+                script {
                         bat "docker login -u riyaji -p %dockerhub-pass%"
                     }
                 }
