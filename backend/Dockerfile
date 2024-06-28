@@ -1,20 +1,14 @@
-# Use Node.js LTS version as the base image
-FROM node:lts
+# Dockerfile for the API service
+FROM node:20.10.0
 
-# Set the working directory inside the container
-WORKDIR /usr/src/app
+RUN npm install -g nodemon
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+WORKDIR /app
 
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the application code
 COPY . .
 
-# Expose the port the app runs on
+RUN npm install
+
 EXPOSE 5000
 
-# Command to run the application with nodemon
-CMD ["npm", "run", "dev"]
+CMD ["npm","run" ,"start"]
