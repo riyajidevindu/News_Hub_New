@@ -15,7 +15,7 @@ pipeline {
         stage('Check Branch') {
             steps {
                 script {
-                    if (env.GIT_BRANCH != 'main') {
+                    if (env.GIT_BRANCH != 'origin/main') {
                         echo "Not on the main branch. Current branch: ${env.GIT_BRANCH}"
                         error("Stopping the pipeline as the branch is not 'main'.")
                     }
