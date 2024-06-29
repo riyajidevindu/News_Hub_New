@@ -1,57 +1,73 @@
 pipeline {
     agent any 
 
-    stages { 
+    environment {
+        GIT_BRANCH = ''
+    }
+
+    stages {
         stage('SCM Checkout') {
             steps {
-                retry(3) {
-                    git branch: 'main', url: 'https://github.com/riyajidevindu/News_Hub_New'
+                script {
+                    def scmVars = checkout scm
+                    GIT_BRANCH = scmVars.GIT_BRANCH
+                    echo "Checked out branch: ${GIT_BRANCH}"
                 }
             }
         }
-        stage('Build Backend Docker Image') {
-            steps {  
-                dir('backend') {
-                    bat 'docker build -t riyaji/news_hub_backend:%BUILD_NUMBER% .'
+
+        stage('Check Branch') {
+            when {
+                expression {
+                    return env.GIT_BRANCH == 'main'
                 }
             }
-        }
-        stage('Build Frontend Docker Image') {
-            steps {
-                dir('frontend') {
-                    bat 'docker build -t riyaji/news_hub_frontend:%BUILD_NUMBER% .'
-                }
-            }
-        }
-        stage('Login to Docker Hub') {
-            steps {
-                withCredentials([string(credentialsId: 'dockerhub-password', variable: 'dockerhub-pass')]) {
-                    script {
-                        bat "docker login -u riyaji -p %dockerhub-pass%"
+            stages {
+                stage('Build Backend Docker Image') {
+                    steps {
+                        dir('backend') {
+                            bat 'docker build -t riyaji/news_hub_backend:%BUILD_NUMBER% .'
+                        }
                     }
                 }
-            }
-        }
-        stage('Push Backend Image') {
-            steps {
-                bat 'docker push riyaji/news_hub_backend:%BUILD_NUMBER%'
-            }
-        }
-        stage('Push Frontend Image') {
-            steps {
-                bat 'docker push riyaji/news_hub_frontend:%BUILD_NUMBER%'
-            }
-        }
-        stage('Deploy with Docker Compose') {
-            steps {
-                withCredentials([string(credentialsId: 'dockerhub-password', variable: 'dockerhub-pass')]) {
-                    script {
-                        bat "docker login -u riyaji -p %dockerhub-pass%"
+                stage('Build Frontend Docker Image') {
+                    steps {
+                        dir('frontend') {
+                            bat 'docker build -t riyaji/news_hub_frontend:%BUILD_NUMBER% .'
+                        }
                     }
                 }
-                bat 'docker-compose down'
-                bat 'docker-compose pull'
-                bat 'docker-compose up -d'
+                stage('Login to Docker Hub') {
+                    steps {
+                        withCredentials([string(credentialsId: 'dockerhub-password', variable: 'dockerhub-pass')]) {
+                            script {
+                                bat "docker login -u riyaji -p %dockerhub-pass%"
+                            }
+                        }
+                    }
+                }
+                stage('Push Backend Image') {
+                    steps {
+                        bat 'docker push riyaji/news_hub_backend:%BUILD_NUMBER%'
+                    }
+                }
+                stage('Push Frontend Image') {
+                    steps {
+                        bat 'docker push riyaji/news_hub_frontend:%BUILD_NUMBER%'
+                    }
+                }
+                stage('Deploy with Docker Compose') {
+                    steps {
+                        withCredentials([string(credentialsId: 'dockerhub-password', variable: 'dockerhub-pass')]) {
+                            script {
+                                bat "docker login -u riyaji -p %dockerhub-pass%"
+                            }
+                        }
+                        bat 'docker-compose down'
+                        bat 'docker-compose pull'
+                        bat 'docker-compose up -d'
+                    }
+                }
             }
         }
     }
