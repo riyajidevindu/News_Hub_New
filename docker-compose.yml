@@ -10,22 +10,30 @@ services:
       - "27017:27017"
 
   backend:
-    image: riyaji/news_hub_backend:${BUILD_NUMBER}
+    build: ./backend
     container_name: backend_container
     ports:
       - "5000:5000"
     depends_on:
       - mongo
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
     env_file:
       - ./backend/.env
 
   frontend:
-    image: riyaji/news_hub_frontend:${BUILD_NUMBER}
+    build: ./frontend
     container_name: frontend_container
     ports:
       - "5173:5173"
     depends_on:
       - backend
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
   mongo_data:
