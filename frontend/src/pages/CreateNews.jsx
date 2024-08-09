@@ -7,7 +7,7 @@ import { URL } from '../url'
 import axios from 'axios'
 import {/* Navigate,*/ useNavigate } from 'react-router-dom'
 
-//This is a change
+
 const CreateNews = () => {
 
   const [title,setTitle]=useState("")
